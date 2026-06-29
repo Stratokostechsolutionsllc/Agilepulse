@@ -45,3 +45,4 @@ Open http://localhost:3000
 4. Start command: `npm start`
 5. Add all .env variables in Render's Environment tab
 6. Update CLIENT_URL in .env to your Render URL
+# Agilepulse
