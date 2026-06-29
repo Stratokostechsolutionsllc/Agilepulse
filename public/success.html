@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url=/?session_id=SESSION_ID_PLACEHOLDER">
+<title>Redirecting…</title>
+<script>
+  // Pass Stripe session_id and plan back to main app
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const plan = params.get('plan');
+  if (sessionId) {
+    window.location.href = `/?session_id=${sessionId}&plan=${plan}`;
+  } else {
+    window.location.href = '/';
+  }
+</script>
+</head>
+<body style="background:#0d0f14;color:#f0f2f8;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+  <p>Setting up your account…</p>
+</body>
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgilePulse — AI Agile Coach by Stratokos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@400;600;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #161921;
+    --surface2: #1e2330;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.15);
+    --text: #f0f2f8;
+    --muted: #7a8099;
+    --accent: #4f8ef7;
+    --accent-dim: rgba(79,142,247,0.12);
+    --accent-border: rgba(79,142,247,0.3);
+    --green: #34c97b;
+    --green-dim: rgba(52,201,123,0.1);
+    --amber: #f5a623;
+    --amber-dim: rgba(245,166,35,0.1);
+    --red: #f05252;
+    --red-dim: rgba(240,82,82,0.1);
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --radius: 10px;
+    --font-display: 'Sora', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+  /* NAV */
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(13,15,20,0.92); backdrop-filter: blur(12px); z-index: 100; }
+  .logo { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; display: inline-block; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .plan-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .plan-badge.free { background: var(--surface2); color: var(--muted); border: 1px solid var(--border-strong); }
+  .plan-badge.pro { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+
+  /* HERO */
+  .hero { text-align: center; padding: 5rem 1.5rem 3rem; max-width: 640px; margin: 0 auto; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; color: var(--accent); text-transform: uppercase; margin-bottom: 1.25rem; }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(28px, 5vw, 44px); font-weight: 700; line-height: 1.15; margin-bottom: 1rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 16px; margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .hero-cta { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .btn { padding: 11px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: var(--font-body); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #6ba3f9; }
+  .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
+  .btn-outline:hover { background: var(--surface2); }
+  .btn-sm { padding: 8px 16px; font-size: 13px; }
+  .btn-upgrade { background: linear-gradient(135deg, #4f8ef7, #a78bfa); color: white; }
+  .btn-upgrade:hover { opacity: 0.9; }
+
+  /* TOOLS GRID */
+  .tools-section { max-width: 900px; margin: 0 auto; padding: 1rem 1.5rem 4rem; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+  .section-title { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; cursor: pointer; transition: all 0.15s; position: relative; overflow: hidden; }
+  .tool-card:hover { border-color: var(--border-strong); background: var(--surface2); }
+  .tool-card.locked { opacity: 0.6; cursor: default; }
+  .tool-card.locked:hover { border-color: var(--border); background: var(--surface); }
+  .tool-icon { font-size: 24px; margin-bottom: 10px; }
+  .tool-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .tool-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .lock-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+  .free-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,201,123,0.25); }
+
+  /* APP PANEL */
+  .app-panel { display: none; max-width: 760px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+  .app-panel.active { display: block; }
+  .panel-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+  .back-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: var(--font-body); }
+  .back-btn:hover { color: var(--text); }
+  .panel-title { font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+
+  /* FORM */
+  .form-group { margin-bottom: 1rem; }
+  label { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  input, textarea, select { width: 100%; background: var(--surface2); border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 10px 14px; color: var(--text); font-family: var(--font-body); font-size: 14px; outline: none; transition: border 0.15s; }
+  input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+  select option { background: var(--surface); }
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  input[type=range] { flex: 1; accent-color: var(--accent); }
+  .slider-val { font-size: 13px; font-weight: 600; color: var(--accent); min-width: 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .run-btn { width: 100%; margin-top: 1rem; padding: 13px; font-size: 15px; }
+
+  /* RESULT */
+  .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-top: 1.5rem; display: none; }
+  .result-box.show { display: block; }
+  .result-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; margin-bottom: 0.75rem; }
+  .result-content { color: var(--text); font-size: 14px; line-height: 1.75; white-space: pre-wrap; }
+  .result-content h3 { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin: 1rem 0 0.4rem; color: var(--accent); }
+  .result-content h3:first-child { margin-top: 0; }
+  .score-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .score-label { font-size: 13px; color: var(--muted); width: 140px; flex-shrink: 0; }
+  .score-bar-wrap { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .score-bar { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+  .score-num { font-size: 13px; font-weight: 600; min-width: 32px; text-align: right; }
+  .loading { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 14px; margin-top: 1rem; }
+  .spinner { width: 18px; height: 18px; border: 2px solid var(--border-strong); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* USAGE METER */
+  .usage-bar-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .usage-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+  .usage-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .usage-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s; }
+  .usage-fill.warn { background: var(--amber); }
+  .usage-fill.danger { background: var(--red); }
+
+  /* PRICING */
+  .pricing-section { max-width: 760px; margin: 0 auto; padding: 1rem 1.5rem 4rem; display: none; }
+  .pricing-section.active { display: block; }
+  .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 1.5rem; }
+  .pricing-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+  .pricing-card.highlight { border-color: var(--accent-border); background: var(--accent-dim); }
+  .plan-name { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .plan-price { font-size: 28px; font-weight: 700; color: var(--text); margin: 0.75rem 0 0.25rem; }
+  .plan-price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .plan-desc { font-size: 12px; color: var(--muted); margin-bottom: 1rem; }
+  .plan-features { list-style: none; font-size: 13px; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 7px; }
+  .plan-features li::before { content: "✓ "; color: var(--green); font-weight: 600; }
+  .plan-features li.no::before { content: "✗ "; color: var(--muted); }
+  .plan-features li.no { color: var(--muted); }
+  .plan-btn { width: 100%; padding: 10px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-body); transition: all 0.15s; }
+  .plan-btn.accent { background: var(--accent); color: white; }
+  .plan-btn.accent:hover { background: #6ba3f9; }
+  .plan-btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--border-strong); }
+
+  /* FOOTER NAV */
+  .bottom-nav { border-top: 1px solid var(--border); padding: 1.5rem 2rem; display: flex; gap: 20px; justify-content: center; }
+  .nav-link { font-size: 13px; color: var(--muted); cursor: pointer; background: none; border: none; font-family: var(--font-body); transition: color 0.1s; }
+  .nav-link:hover { color: var(--text); }
+  .nav-link.active { color: var(--accent); font-weight: 500; }
+
+  /* CHAT TOOL */
+  .chat-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .chat-messages { padding: 1.25rem; min-height: 260px; max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 85%; }
+  .msg.user { align-self: flex-end; background: var(--accent-dim); border: 1px solid var(--accent-border); border-radius: 10px 10px 2px 10px; padding: 10px 14px; font-size: 13px; }
+  .msg.ai { align-self: flex-start; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px 10px 10px 2px; padding: 10px 14px; font-size: 13px; white-space: pre-wrap; line-height: 1.6; }
+  .msg-sender { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+  .chat-input-row { display: flex; gap: 8px; padding: 1rem; border-top: 1px solid var(--border); }
+  .chat-input-row input { margin: 0; }
+  .chat-send { background: var(--accent); color: white; border: none; border-radius: var(--radius); padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: var(--font-body); }
+  .chat-send:hover { background: #6ba3f9; }
+
+  @media (max-width: 600px) {
+    nav { padding: 1rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .hero { padding: 3rem 1rem 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="logo-dot"></span>AgilePulse</div>
+  <div class="nav-right">
+    <span class="plan-badge free" id="plan-badge">Free plan</span>
+    <button class="btn btn-sm" id="billing-btn" onclick="openCustomerPortal()" style="display:none;background:transparent;border:1px solid var(--border-strong);color:var(--muted);font-size:13px;">Manage billing</button>
+    <button class="btn btn-sm btn-upgrade" id="upgrade-btn" onclick="showPricing()">Upgrade</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div id="home-view">
+  <div class="hero">
+    <div class="eyebrow">By Stratokos Tech Solutions</div>
+    <h1>Your team's <span>AI Agile coach</span>, available 24/7</h1>
+    <p>Assessments, sprint coaching, and delivery insights — powered by 20 years of real Agile transformation expertise, built into an AI that never sleeps.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="scrollToTools()">Start your assessment</button>
+      <button class="btn btn-outline" onclick="showPricing()">View plans</button>
+    </div>
+  </div>
+
+  <div class="tools-section" id="tools-section">
+    <div class="section-header">
+      <div class="section-title">Choose a tool</div>
+    </div>
+    <div id="usage-meter" class="usage-bar-wrap">
+      <div class="usage-top">
+        <span style="color:var(--muted);">Free uses this month</span>
+        <span id="usage-text" style="font-weight:600;">0 / 3 used</span>
+      </div>
+      <div class="usage-track"><div class="usage-fill" id="usage-fill" style="width:0%"></div></div>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="openTool('assessment')">
+        <div class="free-badge">Free</div>
+        <div class="tool-icon">📊</div>
+        <div class="tool-name">Team health assessment</div>
+        <div class="tool-desc">Rate your team across 8 Agile dimensions and get a custom improvement plan.</div>
+      </div>
+      <div class="tool-card" onclick="openTool('sprint')">
+        <div class="free-badge">Free</div>
+        <div class="tool-icon">⚡</div>
+        <div class="tool-name">Sprint retrospective coach</div>
+        <div class="tool-desc">Input what went well and what didn't — get actionable retro outcomes.</div>
+      </div>
+      <div class="tool-card locked" onclick="gateCheck('backlog')" id="backlog-card">
+        <div class="lock-badge">Pro</div>
+        <div class="tool-icon">📋</div>
+        <div class="tool-name">Backlog refinement AI</div>
+        <div class="tool-desc">Paste your backlog items and get prioritized, story-pointed, acceptance-criteria-ready tickets.</div>
+      </div>
+      <div class="tool-card locked" onclick="gateCheck('roadmap')" id="roadmap-card">
+        <div class="lock-badge">Pro</div>
+        <div class="tool-icon">🗺️</div>
+        <div class="tool-name">Delivery roadmap builder</div>
+        <div class="tool-desc">Generate an executive-ready roadmap with milestones, risks, and dependencies.</div>
+      </div>
+      <div class="tool-card locked" onclick="gateCheck('coach')" id="coach-card">
+        <div class="lock-badge">Growth</div>
+        <div class="tool-icon">💬</div>
+        <div class="tool-name">Always-on Agile coach</div>
+        <div class="tool-desc">Ask anything — velocity, blockers, team conflict, ceremonies. Real coaching, on demand.</div>
+      </div>
+      <div class="tool-card locked" onclick="gateCheck('metrics')" id="metrics-card">
+        <div class="lock-badge">Growth</div>
+        <div class="tool-icon">📈</div>
+        <div class="tool-name">Delivery metrics analyzer</div>
+        <div class="tool-desc">Paste your sprint data and get lead time, cycle time, and throughput insights.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOL PANELS -->
+<div class="app-panel" id="panel-assessment">
+  <div class="panel-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="panel-title">Team health assessment</div>
+  </div>
+  <div class="form-group">
+    <label>Team name or context</label>
+    <input type="text" id="a-team" placeholder="e.g. Platform Engineering team, 6 people, fintech startup">
+  </div>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;">Rate your team on each dimension (1 = struggling, 5 = thriving)</p>
+  <div id="sliders"></div>
+  <div class="form-group" style="margin-top:1rem;">
+    <label>Biggest current challenge (optional)</label>
+    <textarea id="a-challenge" placeholder="e.g. We keep missing sprint goals, standup feels like a status report..."></textarea>
+  </div>
+  <button class="btn btn-primary run-btn" onclick="runAssessment()">Generate assessment report</button>
+  <div class="loading" id="a-loading" style="display:none;"><div class="spinner"></div> Analyzing your team...</div>
+  <div class="result-box" id="a-result">
+    <div class="result-label">Your assessment report</div>
+    <div id="a-score-bars"></div>
+    <div class="result-content" id="a-content"></div>
+  </div>
+</div>
+
+<div class="app-panel" id="panel-sprint">
+  <div class="panel-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="panel-title">Sprint retrospective coach</div>
+  </div>
+  <div class="form-grid">
+    <div class="form-group">
+      <label>Team size</label>
+      <select id="s-size">
+        <option>2–4 people</option>
+        <option>5–8 people</option>
+        <option>9–15 people</option>
+        <option>15+ people</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Sprint length</label>
+      <select id="s-len">
+        <option>1 week</option>
+        <option>2 weeks</option>
+        <option>3 weeks</option>
+        <option>4 weeks</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>What went well this sprint?</label>
+    <textarea id="s-well" placeholder="e.g. We shipped the auth feature, daily standups were short and focused, good collaboration with design..."></textarea>
+  </div>
+  <div class="form-group">
+    <label>What didn't go well?</label>
+    <textarea id="s-bad" placeholder="e.g. Scope crept mid-sprint, blockers weren't surfaced early enough, QA was a bottleneck..."></textarea>
+  </div>
+  <div class="form-group">
+    <label>Team mood this sprint (1–5)</label>
+    <div class="slider-row">
+      <input type="range" min="1" max="5" value="3" id="s-mood" oninput="document.getElementById('s-mood-val').textContent=this.value">
+      <span class="slider-val" id="s-mood-val">3</span>
+    </div>
+  </div>
+  <button class="btn btn-primary run-btn" onclick="runRetro()">Generate retro outcomes</button>
+  <div class="loading" id="s-loading" style="display:none;"><div class="spinner"></div> Processing your retrospective...</div>
+  <div class="result-box" id="s-result">
+    <div class="result-label">Retrospective outcomes</div>
+    <div class="result-content" id="s-content"></div>
+  </div>
+</div>
+
+<div class="app-panel" id="panel-coach">
+  <div class="panel-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="panel-title">Always-on Agile coach</div>
+  </div>
+  <div class="chat-wrap">
+    <div class="chat-messages" id="chat-msgs">
+      <div class="msg ai">
+        <div class="msg-sender">AgilePulse Coach</div>
+        Hi! I'm your always-on Agile coach, trained on Scrum, Kanban, SAFe, and real-world delivery patterns. Ask me anything — sprint planning, team dynamics, velocity issues, stakeholder management, or Agile transformations.
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-in" placeholder="Ask anything about Agile, delivery, or your team..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chat-send" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="pricing-section" id="pricing-view">
+  <div class="panel-header">
+    <button class="back-btn" onclick="goHome()">← Back</button>
+    <div class="panel-title">Choose your plan</div>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0<span>/mo</span></div>
+      <div class="plan-desc">Try the core tools</div>
+      <ul class="plan-features">
+        <li>3 assessments/month</li>
+        <li>Team health assessment</li>
+        <li>Sprint retro coach</li>
+        <li class="no">Backlog refinement AI</li>
+        <li class="no">Roadmap builder</li>
+        <li class="no">Always-on coach</li>
+        <li class="no">Metrics analyzer</li>
+      </ul>
+      <button class="plan-btn ghost" disabled>Current plan</button>
+    </div>
+    <div class="pricing-card highlight">
+      <div class="plan-name" style="color:var(--accent);">Pro</div>
+      <div class="plan-price">$249<span>/mo</span></div>
+      <div class="plan-desc">For Agile teams scaling delivery</div>
+      <ul class="plan-features">
+        <li>Unlimited assessments</li>
+        <li>Team health assessment</li>
+        <li>Sprint retro coach</li>
+        <li>Backlog refinement AI</li>
+        <li>Delivery roadmap builder</li>
+        <li class="no">Always-on coach</li>
+        <li class="no">Metrics analyzer</li>
+      </ul>
+      <button class="plan-btn accent" onclick="upgradePlan('pro')">Upgrade to Pro</button>
+    </div>
+    <div class="pricing-card">
+      <div class="plan-name" style="color:var(--purple);">Growth</div>
+      <div class="plan-price">$399<span>/mo</span></div>
+      <div class="plan-desc">For enterprise transformation teams</div>
+      <ul class="plan-features">
+        <li>Everything in Pro</li>
+        <li>Always-on Agile coach</li>
+        <li>Delivery metrics analyzer</li>
+        <li>Priority AI responses</li>
+        <li>Export reports as PDF</li>
+        <li>Team seats (up to 10)</li>
+        <li>Monthly strategy digest</li>
+      </ul>
+      <button class="plan-btn accent" style="background:var(--purple);" onclick="upgradePlan('growth')">Upgrade to Growth</button>
+    </div>
+  </div>
+  <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:1.5rem;">✓ Cancel anytime &nbsp;·&nbsp; ✓ 30-day money-back guarantee &nbsp;·&nbsp; ✓ Powered by Stratokos expertise</p>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-link active" onclick="goHome()">Tools</button>
+  <button class="nav-link" onclick="showPricing()">Pricing</button>
+  <button class="nav-link" onclick="alert('Coming soon: team dashboard, usage history, and report exports.')">Dashboard</button>
+</div>
+
+<script>
+const DIMENSIONS = ['Sprint planning','Daily standups','Retrospectives','Backlog health','Team collaboration','Stakeholder communication','Definition of done','Continuous improvement'];
+const sliderVals = {};
+
+function buildSliders() {
+  const wrap = document.getElementById('sliders');
+  DIMENSIONS.forEach(d => {
+    sliderVals[d] = 3;
+    wrap.innerHTML += `
+      <div class="form-group">
+        <label>${d}</label>
+        <div class="slider-row">
+          <input type="range" min="1" max="5" value="3" oninput="sliderVals['${d}']=+this.value;document.getElementById('sv-${d.replace(/\s/g,'')}').textContent=this.value">
+          <span class="slider-val" id="sv-${d.replace(/\s/g,'')}">3</span>
+        </div>
+      </div>`;
+  });
+}
+buildSliders();
+
+let usageCount = parseInt(localStorage.getItem('ap_usage') || '0');
+let plan = localStorage.getItem('ap_plan') || 'free';
+updateUsageMeter();
+updatePlanBadge();
+
+function updateUsageMeter() {
+  const pct = Math.min((usageCount / 3) * 100, 100);
+  const fill = document.getElementById('usage-fill');
+  document.getElementById('usage-text').textContent = `${Math.min(usageCount,3)} / 3 used`;
+  fill.style.width = pct + '%';
+  fill.className = 'usage-fill' + (pct >= 100 ? ' danger' : pct >= 66 ? ' warn' : '');
+  if (plan !== 'free') {
+    document.getElementById('usage-meter').style.display = 'none';
+  }
+}
+
+function updatePlanBadge() {
+  const b = document.getElementById('plan-badge');
+  b.textContent = plan === 'growth' ? 'Growth plan' : plan === 'pro' ? 'Pro plan' : 'Free plan';
+  b.className = 'plan-badge ' + (plan !== 'free' ? 'pro' : 'free');
+  const billingBtn = document.getElementById('billing-btn');
+  const upgradeBtn = document.getElementById('upgrade-btn');
+  if (billingBtn && upgradeBtn) {
+    billingBtn.style.display = plan !== 'free' ? 'inline-flex' : 'none';
+    upgradeBtn.style.display = plan === 'free' ? 'inline-flex' : 'none';
+  }
+  ['backlog','roadmap'].forEach(t => {
+    const c = document.getElementById(t+'-card');
+    if (c && (plan === 'pro' || plan === 'growth')) {
+      c.classList.remove('locked');
+      c.querySelector('.lock-badge').style.display = 'none';
+    }
+  });
+  ['coach','metrics'].forEach(t => {
+    const c = document.getElementById(t+'-card');
+    if (c && plan === 'growth') {
+      c.classList.remove('locked');
+      c.querySelector('.lock-badge').style.display = 'none';
+    }
+  });
+}
+
+function canUse() {
+  if (plan !== 'free') return true;
+  return usageCount < 3;
+}
+
+function trackUse() {
+  if (plan === 'free') {
+    usageCount++;
+    localStorage.setItem('ap_usage', usageCount);
+    updateUsageMeter();
+  }
+}
+
+function gateCheck(tool) {
+  if (plan === 'free') {
+    if (confirm('This tool requires a Pro or Growth plan. Upgrade now?')) showPricing();
+  } else if ((tool === 'coach' || tool === 'metrics') && plan === 'pro') {
+    if (confirm('This tool requires the Growth plan. Upgrade now?')) showPricing();
+  } else {
+    openTool(tool);
+  }
+}
+
+function openTool(tool) {
+  if ((tool === 'assessment' || tool === 'sprint') && !canUse()) {
+    if (confirm('You\'ve used your 3 free assessments this month. Upgrade to continue?')) showPricing();
+    return;
+  }
+  hideAll();
+  const p = document.getElementById('panel-' + tool);
+  if (p) p.classList.add('active');
+}
+
+function hideAll() {
+  document.getElementById('home-view').style.display = 'none';
+  document.getElementById('pricing-view').classList.remove('active');
+  document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('active'));
+}
+
+function goHome() {
+  document.getElementById('home-view').style.display = 'block';
+  document.getElementById('pricing-view').classList.remove('active');
+  document.querySelectorAll('.app-panel').forEach(p => p.classList.remove('active'));
+}
+
+function showPricing() {
+  hideAll();
+  document.getElementById('pricing-view').classList.add('active');
+}
+
+function scrollToTools() {
+  document.getElementById('tools-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function upgradePlan(p) {
+  const btn = document.querySelector(`[onclick="upgradePlan('${p}')"]`);
+  const orig = btn?.textContent;
+  if (btn) { btn.textContent = 'Redirecting to Stripe…'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: p })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url; // redirect to Stripe Checkout
+    } else {
+      alert('Error starting checkout: ' + (data.error || 'Unknown error'));
+      if (btn) { btn.textContent = orig; btn.disabled = false; }
+    }
+  } catch (err) {
+    alert('Could not connect to payment server. Please try again.');
+    if (btn) { btn.textContent = orig; btn.disabled = false; }
+  }
+}
+
+// Called on /success?plan=pro&session_id=... after Stripe redirects back
+async function handleSuccessRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const planParam = params.get('plan');
+  const cancelled = params.get('cancelled');
+
+  if (cancelled) {
+    history.replaceState({}, '', '/');
+    return;
+  }
+
+  if (sessionId && planParam) {
+    try {
+      const res = await fetch(`/verify-session?session_id=${sessionId}`);
+      const data = await res.json();
+      if (data.success) {
+        plan = data.plan;
+        localStorage.setItem('ap_plan', data.plan);
+        if (data.customerId) localStorage.setItem('ap_customer', data.customerId);
+        updatePlanBadge();
+        history.replaceState({}, '', '/');
+        showSuccessBanner(data.plan);
+      }
+    } catch (e) {
+      console.error('Session verify error:', e);
+    }
+  }
+}
+
+function showSuccessBanner(p) {
+  const label = p === 'growth' ? 'Growth' : 'Pro';
+  const banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#34c97b;color:#0d2e1a;padding:10px 24px;border-radius:8px;font-weight:600;font-size:14px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,0.3)';
+  banner.textContent = `🎉 Welcome to ${label}! All tools are now unlocked.`;
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 5000);
+  goHome();
+}
+
+async function openCustomerPortal() {
+  const customerId = localStorage.getItem('ap_customer');
+  if (!customerId) { alert('No billing account found.'); return; }
+  const res = await fetch('/create-portal-session', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customerId })
+  });
+  const data = await res.json();
+  if (data.url) window.location.href = data.url;
+}
+
+// Run on page load to catch Stripe redirect
+handleSuccessRedirect();
+
+async function callClaude(prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system: `You are an expert Agile coach and delivery transformation consultant with 20+ years of experience across enterprise tech, healthcare, and government sectors. You specialize in Scrum, Kanban, SAFe, team dynamics, Salesforce delivery, and PMO governance. You are direct, practical, and specific — you never give generic advice. Format your responses with clear section headers using ###. Be concise but impactful.`,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await res.json();
+  return data.content?.map(b => b.text || '').join('') || 'Unable to generate response.';
+}
+
+async function runAssessment() {
+  const team = document.getElementById('a-team').value || 'your team';
+  const challenge = document.getElementById('a-challenge').value;
+  const scores = Object.entries(sliderVals).map(([k,v]) => `${k}: ${v}/5`).join(', ');
+  const avg = (Object.values(sliderVals).reduce((a,b)=>a+b,0) / DIMENSIONS.length).toFixed(1);
+
+  document.getElementById('a-loading').style.display = 'flex';
+  document.getElementById('a-result').classList.remove('show');
+
+  const prompt = `Team health assessment for: ${team}
+Scores (1-5): ${scores}
+Average: ${avg}/5
+${challenge ? 'Biggest challenge: ' + challenge : ''}
+
+Provide:
+### Overall health score
+Brief interpretation of the ${avg}/5 average.
+### Top 3 strengths
+What they're doing well.
+### Top 3 improvement areas
+Specific, actionable recommendations for the lowest-scoring dimensions.
+### 30-day action plan
+3 concrete actions they can take this month.
+### Coach's insight
+One sharp observation Angella O'Beirne would make based on 20 years in delivery.`;
+
+  try {
+    const result = await callClaude(prompt);
+    trackUse();
+    document.getElementById('a-loading').style.display = 'none';
+    const barsHtml = DIMENSIONS.map(d => {
+      const v = sliderVals[d];
+      const color = v >= 4 ? '#34c97b' : v >= 3 ? '#4f8ef7' : v >= 2 ? '#f5a623' : '#f05252';
+      return `<div class="score-row"><span class="score-label">${d}</span><div class="score-bar-wrap"><div class="score-bar" style="width:${v*20}%;background:${color}"></div></div><span class="score-num" style="color:${color}">${v}/5</span></div>`;
+    }).join('');
+    document.getElementById('a-score-bars').innerHTML = barsHtml + '<br>';
+    document.getElementById('a-content').innerHTML = formatContent(result);
+    document.getElementById('a-result').classList.add('show');
+  } catch(e) {
+    document.getElementById('a-loading').style.display = 'none';
+    alert('Error calling AI. Please try again.');
+  }
+}
+
+async function runRetro() {
+  const size = document.getElementById('s-size').value;
+  const len = document.getElementById('s-len').value;
+  const well = document.getElementById('s-well').value;
+  const bad = document.getElementById('s-bad').value;
+  const mood = document.getElementById('s-mood').value;
+  if (!well && !bad) { alert('Please fill in at least one field.'); return; }
+
+  document.getElementById('s-loading').style.display = 'flex';
+  document.getElementById('s-result').classList.remove('show');
+
+  const prompt = `Sprint retrospective coaching session.
+Team: ${size}, ${len} sprints, mood: ${mood}/5
+Went well: ${well || 'Not specified'}
+Didn't go well: ${bad || 'Not specified'}
+
+Provide:
+### What to celebrate
+Specific recognition of what worked.
+### Root causes
+For each pain point, identify the likely underlying cause (not just symptoms).
+### Action items
+3–5 concrete, owner-assignable actions with suggested timebox.
+### One experiment to try next sprint
+A low-risk change the team can test immediately.
+### Facilitator tip
+How to present these findings to the team in a way that builds trust.`;
+
+  try {
+    const result = await callClaude(prompt);
+    trackUse();
+    document.getElementById('s-loading').style.display = 'none';
+    document.getElementById('s-content').innerHTML = formatContent(result);
+    document.getElementById('s-result').classList.add('show');
+  } catch(e) {
+    document.getElementById('s-loading').style.display = 'none';
+    alert('Error calling AI. Please try again.');
+  }
+}
+
+let chatHistory = [];
+
+async function sendChat() {
+  const input = document.getElementById('chat-in');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  appendMsg('user', msg);
+  chatHistory.push({ role: 'user', content: msg });
+  const thinkingEl = appendMsg('ai', '...');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: 'You are an expert Agile coach with 20+ years across tech, healthcare, and government. You give direct, practical, specific advice. Keep replies concise and conversational — this is a chat, not a report. Never give generic advice.',
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.map(b => b.text || '').join('') || 'Unable to respond.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    thinkingEl.textContent = reply;
+  } catch(e) {
+    thinkingEl.textContent = 'Error connecting. Please try again.';
+  }
+}
+
+function appendMsg(role, text) {
+  const msgs = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  if (role === 'ai') {
+    const sender = document.createElement('div');
+    sender.className = 'msg-sender';
+    sender.textContent = 'AgilePulse Coach';
+    div.appendChild(sender);
+  }
+  const content = document.createElement('span');
+  content.textContent = text;
+  div.appendChild(content);
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return content;
+}
+
+function formatContent(text) {
+  return text
+    .replace(/###\s*(.+)/g, '<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^[-•]\s(.+)/gm, '• $1');
+}
+</script>
+</body>
+</html>
