@@ -151,6 +151,36 @@ app.post('/create-portal-session', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ─── Claude AI endpoint ──────────────────────────────────────────────────────
+app.post('/api/claude', async (req, res) => {
+  const { system, messages } = req.body;
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'Anthropic API key not configured on server' });
+  }
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system,
+        messages,
+      }),
+    });
+    const data = await r.json();
+    if (!r.ok) return res.status(r.status).json({ error: data.error?.message || 'Anthropic API error' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/success', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'success.html'));
 });
