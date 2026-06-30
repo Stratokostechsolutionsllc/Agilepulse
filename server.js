@@ -1,13 +1,24 @@
 require('dotenv').config();
 const express = require('express');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+let stripe = null;
+
+if (stripeSecretKey && stripeSecretKey.startsWith('sk_')) {
+  stripe = require('stripe')(stripeSecretKey);
+} else {
+  console.warn('⚠️  STRIPE_SECRET_KEY is missing or invalid; Stripe routes will be disabled until it is set.');
+}
 
 // ─── Stripe webhook needs raw body — must be before express.json() ───────────
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe is not configured yet.' });
+  }
+
   const sig = req.headers['stripe-signature'];
   let event;
 
@@ -53,6 +64,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Create Stripe Checkout Session ──────────────────────────────────────────
 app.post('/create-checkout-session', async (req, res) => {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe is not configured yet.' });
+  }
+
   const { plan } = req.body;
 
   const priceMap = {
@@ -93,6 +108,10 @@ app.post('/create-checkout-session', async (req, res) => {
 
 // ─── Verify session after redirect (confirm plan to frontend) ────────────────
 app.get('/verify-session', async (req, res) => {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe is not configured yet.' });
+  }
+
   const { session_id } = req.query;
   if (!session_id) return res.status(400).json({ error: 'Missing session_id' });
 
@@ -115,6 +134,10 @@ app.get('/verify-session', async (req, res) => {
 
 // ─── Customer portal (let subscribers manage/cancel their plan) ───────────────
 app.post('/create-portal-session', async (req, res) => {
+  if (!stripe) {
+    return res.status(503).json({ error: 'Stripe is not configured yet.' });
+  }
+
   const { customerId } = req.body;
   if (!customerId) return res.status(400).json({ error: 'Missing customerId' });
 
