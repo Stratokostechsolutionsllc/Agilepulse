@@ -151,7 +151,9 @@ app.post('/create-portal-session', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+app.get('/success', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'success.html'));
+});
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date() }));
 
