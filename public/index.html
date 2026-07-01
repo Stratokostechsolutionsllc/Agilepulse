@@ -597,9 +597,9 @@ async function callClaude(prompt) {
     })
   });
   const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'AI request failed');
   return data.content?.map(b => b.text || '').join('') || 'Unable to generate response.';
 }
-
 async function runAssessment() {
   const team = document.getElementById('a-team').value || 'your team';
   const challenge = document.getElementById('a-challenge').value;
