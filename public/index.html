@@ -592,8 +592,6 @@ async function callClaude(prompt) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1000,
       system: `You are an expert Agile coach and delivery transformation consultant with 20+ years of experience across enterprise tech, healthcare, and government sectors. You specialize in Scrum, Kanban, SAFe, team dynamics, Salesforce delivery, and PMO governance. You are direct, practical, and specific — you never give generic advice. Format your responses with clear section headers using ###. Be concise but impactful.`,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -702,8 +700,6 @@ async function sendChat() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
         system: 'You are an expert Agile coach with 20+ years across tech, healthcare, and government. You give direct, practical, specific advice. Keep replies concise and conversational — this is a chat, not a report. Never give generic advice.',
         messages: chatHistory
       })
